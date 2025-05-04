@@ -22,13 +22,12 @@ export default function Home() {
     var matchname = hostteam + 'vs' + visitteam
     firebaserealtimedb.ref(matchname).push(matchdata, function (err) {
       if (!err) 
-        { alert('data sent successfully'); 
+        { 
           navigate('/BBL', {
             state: { hostteam, visitteam, overs }
           }); }
       else alert('something is wrong')
     })
-    alert('start match')
 
   }
   return (
