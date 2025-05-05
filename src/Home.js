@@ -12,24 +12,17 @@ export default function Home() {
   const [overs, setovers] = useState()
   const [visitteam, setvisitteam] = useState()
 
-  function Startmatch() {
+  function Startmatch() 
+  {
     var matchdata = {
       dbhteam: hostteam,
       dbvteam: visitteam,
       dbovers: overs
     }
-
-    var matchname = hostteam + 'vs' + visitteam
-    firebaserealtimedb.ref(matchname).push(matchdata, function (err) {
-      if (!err) 
-        { alert('data sent successfully'); 
-          navigate('/BBL', {
-            state: { hostteam, visitteam, overs }
-          }); }
-      else alert('something is wrong')
-    })
-    alert('start match')
-
+    navigate('/BBL', {
+      state: { hostteam, visitteam, overs }
+    });
+    alert('starting match')
   }
   return (
     <div>

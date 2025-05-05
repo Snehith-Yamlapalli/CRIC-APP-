@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate ,useLocation} from 'react-router-dom';
-import firebase from './firebase';
 
 export default function BBL() 
 {
@@ -11,10 +10,7 @@ export default function BBL()
   const [nonstriker, setNonstriker] = useState('');
   const [bowler, setBowler] = useState('');
   const navigate = useNavigate();
-  useEffect(() => {
-    
-  },[])
-
+  
   function Startmatch() {
     navigate('/scorecard', {
       state: { hostteam, visitteam, overs  ,striker, nonstriker, bowler }

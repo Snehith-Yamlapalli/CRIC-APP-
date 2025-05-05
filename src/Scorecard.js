@@ -17,42 +17,120 @@ export default function Scorecard() {
   const [nonstrikersixes, setnonstrikersixes] = useState(0)
 
   const [bowlerballs, setbowerballs] = useState(0)
+  // const [bowlerovers]
   const [bowlermaiden, setbowlermaiden] = useState(0)
   const [bowlerruns, setbowlerruns] = useState(0)
   const [bowlerwickets, setbowlerwickets] = useState(0)
 
   const [teamruns, setteamruns] = useState(0)
   const [teamwickets, setteamwickets] = useState(0)
-  const [overs, setovers] = useState(0)
+  const [Teamovers, setTeamovers] = useState(0)
   const [tag, settag] = useState(true)
-  const [overscompleted, setoverscompleted] = useState(0)
+  const [Innings,setInnings] = useState(1)
 
-  const { hostteam, visitteam, totalovers, striker, nonstriker, bowler } = location.state || {};
-
+  const { hostteam, visitteam, over, striker, nonstriker, bowler } = location.state || {};
+  const Key = `Innings${Innings}`
+  const matchid = hostteam + 'vs' + visitteam
   useEffect(() => {
-    if (bowlerballs > 0 && bowlerballs % 6 === 0) 
+    if (bowlerballs === 0)
+    {
+      firebaserealtimedb.ref(`${matchid}/${Key}/batsmen/${striker}`)
+      .once('value')
+      .then(snap => {
+        const d = snap.val()
+        if (d) {
+          setstrikerruns(d.runs ?? 0)
+          setstrikerballs(d.balls ?? 0)
+          setstrikerfours(d.fours ?? 0)
+          setstrikersixes(d.sixes ?? 0)
+        }
+      })
+      firebaserealtimedb.ref(`${matchid}/${Key}/batsmen/${nonstriker}`)
+      .once('value')
+      .then(snap => {
+        const d = snap.val()
+        if (d) {
+          setnonstrikerruns(d.runs ?? 0)
+          setnonstrikerballs(d.balls ?? 0)
+          setnonstrikerfours(d.fours ?? 0)
+          setnonstrikersixes(d.sixes ?? 0)
+        }
+      })
+      firebaserealtimedb.ref(`${matchid}/${Key}/bowlers/${bowler}`)
+      .once('value')
+      .then(snap => {
+        const d = snap.val()
+        if (d) {
+          setbowlerruns(d.runs ?? 0)
+          setbowerballs(d.overs ?? 0)
+          setbowlerwickets(d.wickets ?? 0)
+          setbowlermaiden(d.maidens ?? 0)
+        }
+      })
+      firebaserealtimedb.ref(`${matchid}/${Key}`)
+      .once('value')
+      .then(snap => {
+        const d = snap.val()
+        if (d) {
+          setteamruns(d.Totalteamruns ?? 0)
+          setteamwickets(d.Totalteamwickets ?? 0)
+          setTeamovers(d.Totalteamovers ?? 0)
+        }
+      })
+    }
+
+    if (bowlerballs  === 6) 
       {
-          settag(curr => !curr);
-         var data = 
-         {
-           [striker]: { strikerruns, strikerballs, strikerballs,strikerfours, strikersixes },
-           [nonstriker]: { nonstrikerruns, nonstrikerballs, nonstrikerballs,nonstrikerfours, nonstrikersixes },
-           [bowler]: { bowlerruns, bowlerballs, bowlermaiden, bowlerwickets }
-         }
-         var matchid = hostteam + 'vs' + visitteam
-         firebaserealtimedb.ref(matchid).push(data, function (err) 
-         {
-           if (!err) 
-           {
-             alert('data sent successfully');
-             navigate('/NewBowler', {
-               state: { hostteam, visitteam, overs, striker, nonstriker, bowler }
-             });
-           }
-           else alert('something is wrong')
-         })
-       }
-    if (bowlerruns === 0) setbowlermaiden(p => p + 1)
+      setTeamovers(prev=>prev+1)
+      alert(`&& overs are ${Teamovers}`)
+      setbowerballs(prev=>prev-6)
+      alert(`In the 2nd ${bowlerballs}`)
+
+      const full = Math.floor(bowlerballs / 6)
+      const balls = bowlerballs % 6
+      setTeamovers(`${full}.${balls}`)
+        
+      const updates = 
+      {
+        [`${Key}/Totalteamruns`]:    teamruns,
+        [`${Key}/Totalteamwickets`]: teamwickets,
+        [`${Key}/Totalteamovers`]:   Teamovers,
+  
+       
+        [`${Key}/batsmen/${striker}`]: {
+          runs:  strikerruns,
+          balls: strikerballs,
+          fours: strikerfours,
+          sixes: strikersixes
+        },
+        [`${Key}/batsmen/${nonstriker}`]: {
+          runs:  nonstrikerruns,
+          balls: nonstrikerballs,
+          fours: nonstrikerfours,
+          sixes: nonstrikersixes
+        },
+        
+        [`${Key}/bowlers/${bowler}`]: {
+          runs:    bowlerruns,
+          overs:Teamovers,
+          wickets: bowlerwickets,
+          maidens: bowlermaiden
+        }
+      }
+  
+      
+      firebaserealtimedb
+        .ref(`${matchid}`)  
+        .update(updates)
+        .then(() => {
+          
+          navigate('/newbowler', {
+            state: { matchid, hostteam, visitteam, Teamovers, striker, nonstriker }
+          })
+        })
+        .catch(err => console.error(err))
+    }
+    
   }, [bowlerballs, bowlerruns]);
 
 
@@ -80,8 +158,8 @@ export default function Scorecard() {
 
     setteamruns(r => r + val);
     setteamwickets(w => w + (val === 'W' ? 1 : 0));
-    setovers(o => {
-      return (overscompleted + bowlerballs / 10);
+    setTeamovers(o => {
+      return (Teamovers + bowlerballs / 10);
     });
 
     setbowerballs(prevBalls => {
@@ -90,7 +168,7 @@ export default function Scorecard() {
       const ballsInCurrent = newBalls % 6;
       const oversDecimal = fullOvers + ballsInCurrent / 10;
 
-      setovers(oversDecimal);
+      setTeamovers(oversDecimal);
       return newBalls;
     });
   }
@@ -108,7 +186,7 @@ export default function Scorecard() {
       <div className='shadow-lg p-3 mb-3 bg-white rounded col-md-7'>
         <div><h3>{hostteam} Innings</h3> </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <h3>{teamruns}</h3> <h2>-</h2> <h3>{teamwickets}</h3> <h2>(</h2> <h3>{overs}</h3> <h2>)</h2>
+          <h3>{teamruns}</h3> <h2>-</h2> <h3>{teamwickets}</h3> <h2>(</h2> <h3>{Teamovers}</h3> <h2>)</h2>
         </div>
       </div>
 
@@ -151,7 +229,7 @@ export default function Scorecard() {
           <thead>
             <tr>
               <th>Bowler</th>
-              <th>O</th>
+              <th>B</th>
               <th>M</th>
               <th>R</th>
               <th>W</th>
