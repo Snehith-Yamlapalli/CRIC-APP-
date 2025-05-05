@@ -75,3 +75,6 @@ export default App;
   const [wickets, setwickets] = useState(0)
   const [bowlerruns, setbowlerruns] = useState(0)
   const [overs, setovers] = useState(0)
+
+  style={{ backgroundColor: !tag ? '#d4edda' : 'transparent', color: !tag ? 'red' : 'inherit', fontWeight: !tag ? 'bold' : '' }}
+  style={{ backgroundColor: tag ? '#d4edda' : 'transparent', color: tag ? 'red' : 'inherit', fontWeight: 'bold' }}

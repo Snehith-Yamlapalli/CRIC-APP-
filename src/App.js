@@ -4,6 +4,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './Home';
 import BBL from './BBL';
 import Scorecard from './Scorecard';
+import NewBatsman from './NewBatsman';
+import NewBowler from './NewBowler';
 function App() {
 
   return (
@@ -13,6 +15,7 @@ function App() {
         <Route path="/" element={<Home/>} />
         <Route path="/BBL" element={<BBL />} />
         <Route path="/scorecard" element={<Scorecard />} />
+        <Route path="/NewBowler" element={<NewBowler />} />
         <Route path="*" element={<h1>Page Not Found</h1>} />
       </Routes>
     </Router>

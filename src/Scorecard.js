@@ -1,8 +1,10 @@
 import { React, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import firebase from './firebase';
 
-export default function Scorecard() 
-{
+export default function Scorecard() {
+  const navigate = useNavigate();
+  const firebaserealtimedb = firebase.database()
   const location = useLocation();
   var [strikerruns, setstrikerruns] = useState(0)
   var [strikerballs, setstrikerballs] = useState(0)
@@ -27,17 +29,36 @@ export default function Scorecard()
 
   const { hostteam, visitteam, totalovers, striker, nonstriker, bowler } = location.state || {};
 
-  useEffect(() => 
-    {
-    if (bowlerballs > 0 && bowlerballs % 6 === 0) settag(curr => !curr);
-    if(bowlerruns===0)setbowlermaiden(p=>p+1)
-  }, [bowlerballs,bowlerruns]);
+  useEffect(() => {
+    if (bowlerballs > 0 && bowlerballs % 6 === 0) 
+      {
+          settag(curr => !curr);
+         var data = 
+         {
+           [striker]: { strikerruns, strikerballs, strikerballs,strikerfours, strikersixes },
+           [nonstriker]: { nonstrikerruns, nonstrikerballs, nonstrikerballs,nonstrikerfours, nonstrikersixes },
+           [bowler]: { bowlerruns, bowlerballs, bowlermaiden, bowlerwickets }
+         }
+         var matchid = hostteam + 'vs' + visitteam
+         firebaserealtimedb.ref(matchid).push(data, function (err) 
+         {
+           if (!err) 
+           {
+             alert('data sent successfully');
+             navigate('/NewBowler', {
+               state: { hostteam, visitteam, overs, striker, nonstriker, bowler }
+             });
+           }
+           else alert('something is wrong')
+         })
+       }
+    if (bowlerruns === 0) setbowlermaiden(p => p + 1)
+  }, [bowlerballs, bowlerruns]);
 
 
-  function updatescore(val) 
-  {
-    if(val==='W'){
-      setbowlerwickets(r=>r+1);
+  function updatescore(val) {
+    if (val === 'W') {
+      setbowlerwickets(r => r + 1);
       return;
     }
     if (val % 2 === 1) {
@@ -73,7 +94,7 @@ export default function Scorecard()
       return newBalls;
     });
   }
-  
+
   return (
     <div className='row justify-content-center'>
       <div id='teams' className='row justify-content-center '>
