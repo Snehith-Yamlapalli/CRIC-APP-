@@ -82,10 +82,7 @@ export default function Scorecard() {
     if (bowlerballs  === 6) 
       {
       setTeamovers(prev=>prev+1)
-      alert(`&& overs are ${Teamovers}`)
       setbowerballs(prev=>prev-6)
-      alert(`In the 2nd ${bowlerballs}`)
-
       const full = Math.floor(bowlerballs / 6)
       const balls = bowlerballs % 6
       setTeamovers(`${full}.${balls}`)
